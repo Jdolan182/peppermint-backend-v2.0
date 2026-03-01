@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: peppermint
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - /home/jordy/projects/peppermint-v2.0/peppermint-backend-v2.0:/var/www/html
+    networks:
+      - laravel
+
+  web:
+    image: nginx:stable-alpine
+    container_name: peppermint_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - /home/jordy/projects/peppermint-v2.0/peppermint-backend-v2.0:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - laravel
+
+  mysql:
+    image: mysql:8.0
+    container_name: peppermint_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: peppermint
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: secret
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - laravel
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: mysql
+      MYSQL_ROOT_PASSWORD: root
+    networks:
+      - laravel
+
+volumes:
+  mysql_data:
+
+networks:
+  laravel:
