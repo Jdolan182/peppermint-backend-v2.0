@@ -31,6 +31,11 @@
         <env name="LOG_CHANNEL" value="null"/>
         <env name="MODULE_ADMIN_ENABLED" value="true"/>
         <env name="MODULE_PUBLIC_ENABLED" value="true"/>
+        <env name="MODULE_CONSUMERS_ENABLED" value="true"/>
+        <env name="MODULE_TEAM_ENABLED" value="true"/>
+        <env name="MODULE_BLOGS_ENABLED" value="true"/>
+        <env name="MODULE_SETTINGS_ENABLED" value="true"/>
+        <env name="MODULE_PUBLIC_LOGIN_ENABLED" value="true"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>

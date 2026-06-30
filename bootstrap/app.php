@@ -17,7 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Session\Middleware\StartSession::class,
         ]);
         $middleware->alias([
-            'module' => \App\Http\Middleware\EnsureModuleEnabled::class,
+            'module'      => \App\Http\Middleware\EnsureModuleEnabled::class,
+            'maintenance' => \App\Http\Middleware\CheckMaintenanceMode::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
