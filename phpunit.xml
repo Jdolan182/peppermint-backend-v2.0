@@ -35,6 +35,7 @@
         <env name="MODULE_TEAM_ENABLED" value="true"/>
         <env name="MODULE_BLOGS_ENABLED" value="true"/>
         <env name="MODULE_SETTINGS_ENABLED" value="true"/>
+        <env name="MODULE_PAGES_ENABLED" value="true"/>
         <env name="MODULE_PUBLIC_LOGIN_ENABLED" value="true"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>

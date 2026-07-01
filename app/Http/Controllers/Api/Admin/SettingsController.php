@@ -27,6 +27,7 @@ class SettingsController extends Controller
             'module_public_login'  => ['sometimes', 'boolean'],
             'module_team'          => ['sometimes', 'boolean'],
             'module_public'        => ['sometimes', 'boolean'],
+            'module_pages'         => ['sometimes', 'boolean'],
         ]);
 
         foreach ($data as $key => $value) {
