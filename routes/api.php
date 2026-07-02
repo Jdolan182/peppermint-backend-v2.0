@@ -19,6 +19,14 @@ use App\Http\Controllers\Api\Public\PagesController as PublicPagesController;
 use App\Http\Controllers\Api\Public\FooterController as PublicFooterController;
 use App\Http\Controllers\Api\Public\ContactController as PublicContactController;
 use App\Http\Controllers\Api\Admin\ContactController as AdminContactController;
+use App\Http\Controllers\Api\Admin\TaskTypesController;
+use App\Http\Controllers\Api\Admin\TaskStatusesController;
+use App\Http\Controllers\Api\Admin\TasksController;
+use App\Http\Controllers\Api\Admin\RoadmapController as AdminRoadmapController;
+use App\Http\Controllers\Api\Admin\RoadmapCategoriesController;
+use App\Http\Controllers\Api\Admin\CalendarController;
+use App\Http\Controllers\Api\Consumer\TasksController as ConsumerTasksController;
+use App\Http\Controllers\Api\Public\RoadmapController as PublicRoadmapController;
 use App\Http\Controllers\Api\UserController;
 
 Route::get('/test', [TestController::class, 'test']);
@@ -85,6 +93,40 @@ Route::prefix('admin')->middleware(['module:admin', 'maintenance:admin'])->group
             Route::post('contact/{submission}/read', [AdminContactController::class, 'markRead']);
             Route::delete('contact/{submission}', [AdminContactController::class, 'destroy']);
         });
+
+        Route::middleware('module:tasks')->group(function () {
+            Route::get('task-types', [TaskTypesController::class, 'index']);
+            Route::post('task-types', [TaskTypesController::class, 'store']);
+            Route::put('task-types/{taskType}', [TaskTypesController::class, 'update']);
+            Route::delete('task-types/{taskType}', [TaskTypesController::class, 'destroy']);
+
+            Route::get('task-statuses', [TaskStatusesController::class, 'index']);
+            Route::post('task-statuses', [TaskStatusesController::class, 'store']);
+            Route::put('task-statuses/{taskStatus}', [TaskStatusesController::class, 'update']);
+            Route::delete('task-statuses/{taskStatus}', [TaskStatusesController::class, 'destroy']);
+
+            Route::get('tasks', [TasksController::class, 'index']);
+            Route::post('tasks', [TasksController::class, 'store']);
+            Route::get('tasks/{task}', [TasksController::class, 'show']);
+            Route::put('tasks/{task}', [TasksController::class, 'update']);
+            Route::delete('tasks/{task}', [TasksController::class, 'destroy']);
+        });
+
+        Route::middleware('module:roadmap')->group(function () {
+            Route::get('roadmap', [AdminRoadmapController::class, 'index']);
+            Route::post('roadmap', [AdminRoadmapController::class, 'store']);
+            Route::get('roadmap/{roadmapItem}', [AdminRoadmapController::class, 'show']);
+            Route::put('roadmap/{roadmapItem}', [AdminRoadmapController::class, 'update']);
+            Route::delete('roadmap/{roadmapItem}', [AdminRoadmapController::class, 'destroy']);
+            Route::put('roadmap-order', [AdminRoadmapController::class, 'saveOrder']);
+            Route::get('roadmap-categories', [RoadmapCategoriesController::class, 'index']);
+            Route::post('roadmap-categories', [RoadmapCategoriesController::class, 'store']);
+            Route::put('roadmap-categories/{roadmapCategory}', [RoadmapCategoriesController::class, 'update']);
+            Route::delete('roadmap-categories/{roadmapCategory}', [RoadmapCategoriesController::class, 'destroy']);
+        });
+
+        // Calendar — auth-protected; frontend gates visibility based on tasks/roadmap modules
+        Route::get('calendar', [CalendarController::class, 'index']);
     });
 });
 
@@ -114,5 +156,15 @@ Route::prefix('consumer')->middleware(['module:consumers', 'maintenance'])->grou
 
     Route::middleware('auth:consumer')->group(function () {
         Route::get('/user', [UserController::class, 'getConsumer']);
+
+        Route::middleware('module:tasks_consumer')->group(function () {
+            Route::get('/tasks', [ConsumerTasksController::class, 'index']);
+            Route::get('/tasks/{task}', [ConsumerTasksController::class, 'show']);
+        });
     });
+});
+
+// Public roadmap
+Route::prefix('public')->middleware(['maintenance', 'module:roadmap_public'])->group(function () {
+    Route::get('/roadmap', [PublicRoadmapController::class, 'index']);
 });

@@ -7,7 +7,7 @@ use App\Models\Setting;
 
 class ModulesController extends Controller
 {
-    private const MODULES = ['blogs', 'public', 'consumers', 'public_login', 'team', 'settings', 'pages'];
+    private const MODULES = ['blogs', 'public', 'consumers', 'public_login', 'team', 'settings', 'pages', 'tasks', 'tasks_consumer', 'roadmap', 'roadmap_public', 'appointments'];
 
     public function index(): \Illuminate\Http\JsonResponse
     {

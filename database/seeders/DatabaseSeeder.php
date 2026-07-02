@@ -6,6 +6,7 @@ use App\Models\Consumer;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Database\Seeders\TaskSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -21,6 +22,10 @@ class DatabaseSeeder extends Seeder
         Consumer::factory()->create([
             'name' => 'Test Consumer',
             'email' => 'consumer@example.com',
+        ]);
+
+        $this->call([
+            TaskSeeder::class,
         ]);
     }
 }
