@@ -24,9 +24,10 @@ test('authenticated admin can create a consumer', function () {
 
     $this->actingAs($admin, 'web')
         ->postJson('/api/admin/consumers', [
-            'name'     => 'Jane Doe',
-            'email'    => 'jane@example.com',
-            'password' => 'password123',
+            'name'                  => 'Jane Doe',
+            'email'                 => 'jane@example.com',
+            'password'              => 'password123',
+            'password_confirmation' => 'password123',
         ])
         ->assertCreated()
         ->assertJsonPath('data.name', 'Jane Doe')

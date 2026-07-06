@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Consumer;
+use App\Models\RoadmapItem;
 use App\Models\Task;
 use App\Models\TaskStatus;
 use App\Models\TaskType;
@@ -216,4 +217,76 @@ test('unauthenticated request to delete task returns 401', function () {
     $task = Task::factory()->create();
 
     $this->deleteJson("/api/admin/tasks/{$task->id}")->assertUnauthorized();
+});
+
+test('index filters tasks by type_id', function () {
+    $admin  = User::factory()->create();
+    $typeA  = TaskType::factory()->create();
+    $typeB  = TaskType::factory()->create();
+    $status = TaskStatus::factory()->create();
+    Task::factory()->create(['type_id' => $typeA->id, 'status_id' => $status->id]);
+    Task::factory()->create(['type_id' => $typeB->id, 'status_id' => $status->id]);
+
+    $response = $this->actingAs($admin, 'web')
+        ->getJson("/api/admin/tasks?type_id={$typeA->id}")
+        ->assertOk();
+
+    expect($response->json())->toHaveCount(1)
+        ->and($response->json('0.type.id'))->toBe($typeA->id);
+});
+
+test('index filters tasks by consumer_id', function () {
+    $admin    = User::factory()->create();
+    $consumer = Consumer::factory()->create();
+    $type     = TaskType::factory()->create();
+    $status   = TaskStatus::factory()->create();
+    Task::factory()->create(['type_id' => $type->id, 'status_id' => $status->id, 'consumer_id' => $consumer->id]);
+    Task::factory()->create(['type_id' => $type->id, 'status_id' => $status->id]);
+
+    $response = $this->actingAs($admin, 'web')
+        ->getJson("/api/admin/tasks?consumer_id={$consumer->id}")
+        ->assertOk();
+
+    expect($response->json())->toHaveCount(1)
+        ->and($response->json('0.consumer.id'))->toBe($consumer->id);
+});
+
+test('index filters tasks by roadmap_item_id', function () {
+    $admin  = User::factory()->create();
+    $item   = RoadmapItem::factory()->create();
+    $type   = TaskType::factory()->create();
+    $status = TaskStatus::factory()->create();
+    Task::factory()->create(['type_id' => $type->id, 'status_id' => $status->id, 'roadmap_item_id' => $item->id]);
+    Task::factory()->create(['type_id' => $type->id, 'status_id' => $status->id]);
+
+    $response = $this->actingAs($admin, 'web')
+        ->getJson("/api/admin/tasks?roadmap_item_id={$item->id}")
+        ->assertOk();
+
+    expect($response->json())->toHaveCount(1)
+        ->and($response->json('0.roadmap_item.id'))->toBe($item->id);
+});
+
+test('index with paginate returns a paginated response', function () {
+    $admin  = User::factory()->create();
+    $type   = TaskType::factory()->create();
+    $status = TaskStatus::factory()->create();
+    Task::factory(5)->create(['type_id' => $type->id, 'status_id' => $status->id]);
+
+    $response = $this->actingAs($admin, 'web')
+        ->getJson('/api/admin/tasks?paginate=1&per_page=2')
+        ->assertOk();
+
+    expect($response->json('total'))->toBe(5)
+        ->and($response->json('data'))->toHaveCount(2);
+});
+
+test('task update via PATCH works the same as PUT', function () {
+    $admin = User::factory()->create();
+    $task  = Task::factory()->create(['title' => 'Original']);
+
+    $this->actingAs($admin, 'web')
+        ->patchJson("/api/admin/tasks/{$task->id}", ['title' => 'Patched'])
+        ->assertOk()
+        ->assertJsonPath('title', 'Patched');
 });

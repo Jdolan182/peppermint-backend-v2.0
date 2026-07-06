@@ -16,7 +16,7 @@ class UpdateConsumerRequest extends FormRequest
         return [
             'name'     => ['required', 'string', 'max:255'],
             'email'    => ['required', 'email', 'unique:consumers,email,' . $this->route('consumer')->id],
-            'password' => ['nullable', 'string', 'min:8'],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ];
     }
 }

@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Services\AuthService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -22,5 +25,45 @@ class UserController extends Controller
         return response()->json([
             'data' => $this->authService->user('consumer'),
         ]);
+    }
+
+    public function updateAdmin(Request $request)
+    {
+        $user = Auth::guard('web')->user();
+
+        $validated = $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
+            'password' => 'nullable|string|min:8|confirmed',
+        ]);
+
+        $user->name  = $validated['name'];
+        $user->email = $validated['email'];
+        if (!empty($validated['password'])) {
+            $user->password = Hash::make($validated['password']);
+        }
+        $user->save();
+
+        return response()->json(['data' => $user]);
+    }
+
+    public function updateConsumer(Request $request)
+    {
+        $consumer = Auth::guard('consumer')->user();
+
+        $validated = $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => ['required', 'email', Rule::unique('consumers', 'email')->ignore($consumer->id)],
+            'password' => 'nullable|string|min:8|confirmed',
+        ]);
+
+        $consumer->name  = $validated['name'];
+        $consumer->email = $validated['email'];
+        if (!empty($validated['password'])) {
+            $consumer->password = Hash::make($validated['password']);
+        }
+        $consumer->save();
+
+        return response()->json(['data' => $consumer]);
     }
 }

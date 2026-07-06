@@ -23,9 +23,10 @@ test('authenticated admin can create a user', function () {
 
     $this->actingAs($admin, 'web')
         ->postJson('/api/admin/users', [
-            'name'     => 'John Doe',
-            'email'    => 'john@example.com',
-            'password' => 'password123',
+            'name'                  => 'John Doe',
+            'email'                 => 'john@example.com',
+            'password'              => 'password123',
+            'password_confirmation' => 'password123',
         ])
         ->assertCreated()
         ->assertJsonPath('data.name', 'John Doe')

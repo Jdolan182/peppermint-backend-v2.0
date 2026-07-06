@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\Admin\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UsersController extends Controller
 {
@@ -40,6 +41,8 @@ class UsersController extends Controller
 
     public function destroy(User $user)
     {
+        abort_if($user->id === Auth::id(), 422, 'You cannot delete your own account.');
+
         $user->delete();
 
         return response()->json(['message' => 'User deleted']);

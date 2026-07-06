@@ -25,6 +25,7 @@ use App\Http\Controllers\Api\Admin\TasksController;
 use App\Http\Controllers\Api\Admin\RoadmapController as AdminRoadmapController;
 use App\Http\Controllers\Api\Admin\RoadmapCategoriesController;
 use App\Http\Controllers\Api\Admin\CalendarController;
+use App\Http\Controllers\Api\Admin\StatsController;
 use App\Http\Controllers\Api\Consumer\TasksController as ConsumerTasksController;
 use App\Http\Controllers\Api\Public\RoadmapController as PublicRoadmapController;
 use App\Http\Controllers\Api\UserController;
@@ -33,11 +34,12 @@ Route::get('/test', [TestController::class, 'test']);
 
 // Admin module
 Route::prefix('admin')->middleware(['module:admin', 'maintenance:admin'])->group(function () {
-    Route::post('/auth/login', [AdminAuthController::class, 'login']);
+    Route::post('/auth/login', [AdminAuthController::class, 'login'])->middleware('throttle:10,1');
     Route::post('/auth/logout', [AdminAuthController::class, 'logout'])->middleware('auth:web');
 
     Route::middleware('auth:web')->group(function () {
         Route::get('/user', [UserController::class, 'getUser']);
+        Route::put('/user', [UserController::class, 'updateAdmin']);
 
         Route::middleware('module:consumers')->group(function () {
             Route::apiResource('consumers', ConsumersController::class);
@@ -109,6 +111,7 @@ Route::prefix('admin')->middleware(['module:admin', 'maintenance:admin'])->group
             Route::post('tasks', [TasksController::class, 'store']);
             Route::get('tasks/{task}', [TasksController::class, 'show']);
             Route::put('tasks/{task}', [TasksController::class, 'update']);
+            Route::patch('tasks/{task}', [TasksController::class, 'update']);
             Route::delete('tasks/{task}', [TasksController::class, 'destroy']);
         });
 
@@ -124,6 +127,9 @@ Route::prefix('admin')->middleware(['module:admin', 'maintenance:admin'])->group
             Route::put('roadmap-categories/{roadmapCategory}', [RoadmapCategoriesController::class, 'update']);
             Route::delete('roadmap-categories/{roadmapCategory}', [RoadmapCategoriesController::class, 'destroy']);
         });
+
+        // Stats — auth-protected; frontend gates visibility based on modules
+        Route::get('stats', [StatsController::class, 'index']);
 
         // Calendar — auth-protected; frontend gates visibility based on tasks/roadmap modules
         Route::get('calendar', [CalendarController::class, 'index']);
@@ -151,11 +157,12 @@ Route::prefix('public')->group(function () {
 
 // Consumer module
 Route::prefix('consumer')->middleware(['module:consumers', 'maintenance'])->group(function () {
-    Route::post('/auth/login', [ConsumerAuthController::class, 'login'])->middleware('module:public_login');
+    Route::post('/auth/login', [ConsumerAuthController::class, 'login'])->middleware(['module:public_login', 'throttle:10,1']);
     Route::post('/auth/logout', [ConsumerAuthController::class, 'logout'])->middleware('auth:consumer');
 
     Route::middleware('auth:consumer')->group(function () {
         Route::get('/user', [UserController::class, 'getConsumer']);
+        Route::put('/user', [UserController::class, 'updateConsumer']);
 
         Route::middleware('module:tasks_consumer')->group(function () {
             Route::get('/tasks', [ConsumerTasksController::class, 'index']);

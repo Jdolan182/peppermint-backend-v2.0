@@ -141,10 +141,12 @@ test('unauthenticated request to update media returns 401', function () {
 test('authenticated admin can delete media and its file', function () {
     Storage::fake('public');
     $admin = User::factory()->create();
-    $file = UploadedFile::fake()->image('to-delete.jpg');
-    $path = $file->store('media', 'public');
 
-    $media = Media::factory()->create(['path' => $path, 'disk' => 'public']);
+    $filePath = 'media/test-to-delete.jpg';
+    Storage::disk('public')->put($filePath, 'fake image content');
+    $media = Media::factory()->create(['path' => $filePath, 'disk' => 'public']);
+
+    Storage::disk('public')->assertExists($filePath);
 
     $this->actingAs($admin, 'web')
         ->deleteJson("/api/admin/media/{$media->id}")
@@ -152,7 +154,7 @@ test('authenticated admin can delete media and its file', function () {
         ->assertJson(['message' => 'Media deleted']);
 
     $this->assertDatabaseMissing('media', ['id' => $media->id]);
-    Storage::disk('public')->assertMissing($path);
+    Storage::disk('public')->assertMissing($filePath);
 });
 
 test('unauthenticated request to delete media returns 401', function () {

@@ -25,7 +25,7 @@ class CalendarController extends Controller
             ->get()
             ->map(fn($t) => array_merge($t->toArray(), ['_type' => 'task']));
 
-        $roadmapItems = RoadmapItem::with('assignedAdmin')
+        $roadmapItems = RoadmapItem::with(['assignedAdmin', 'category'])
             ->whereNotNull('date')
             ->whereBetween('date', [$from, $to])
             ->get()
