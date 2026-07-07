@@ -11,9 +11,8 @@ class EnsureModuleEnabled
 {
     public function handle(Request $request, Closure $next, string $module): Response
     {
-        // Env check — the licence gate (set by the developer at deployment)
-        $envKey = 'MODULE_' . strtoupper($module) . '_ENABLED';
-        if (!env($envKey, false)) {
+        // Config check — the licence gate (set by the developer at deployment)
+        if (!config('peppermint.modules.' . $module, false)) {
             return response()->json(['message' => 'Module not available'], 404);
         }
 

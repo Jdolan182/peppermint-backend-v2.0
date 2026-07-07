@@ -32,15 +32,19 @@ class UserController extends Controller
         $user = Auth::guard('web')->user();
 
         $validated = $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
-            'password' => 'nullable|string|min:8|confirmed',
+            'name'           => 'required|string|max:255',
+            'email'          => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
+            'password'       => 'nullable|string|min:8|confirmed',
+            'notify_contact' => 'sometimes|boolean',
         ]);
 
         $user->name  = $validated['name'];
         $user->email = $validated['email'];
         if (!empty($validated['password'])) {
             $user->password = Hash::make($validated['password']);
+        }
+        if (array_key_exists('notify_contact', $validated)) {
+            $user->notify_contact = $validated['notify_contact'];
         }
         $user->save();
 

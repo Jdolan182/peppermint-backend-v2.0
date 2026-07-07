@@ -62,3 +62,14 @@ test('unauthenticated admin logout returns 401', function () {
     $this->postJson('/api/admin/auth/logout')
         ->assertUnauthorized();
 });
+
+test('admin login fails when user is inactive', function () {
+    $user = User::factory()->create(['is_active' => false]);
+
+    $this->postJson('/api/admin/auth/login', [
+        'email'    => $user->email,
+        'password' => 'password',
+    ])
+        ->assertStatus(401)
+        ->assertJson(['message' => 'Invalid credentials']);
+});

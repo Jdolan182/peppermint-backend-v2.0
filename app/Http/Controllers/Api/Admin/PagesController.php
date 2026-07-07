@@ -14,16 +14,24 @@ class PagesController extends Controller
 
     public function index()
     {
-        return response()->json(
-            Page::whereNull('parent_id')
-                ->with('children')
-                ->orderBy('nav_order')
-                ->get()
-        );
+        $pages = Page::whereNull('parent_id')
+            ->with('children')
+            ->orderBy('nav_order')
+            ->get();
+
+        return response()->json([
+            'pages'      => $pages,
+            'page_limit' => $this->pageLimit(),
+        ]);
     }
 
     public function store(Request $request)
     {
+        $limit = $this->pageLimit();
+        if ($limit !== null && Page::count() >= $limit) {
+            return response()->json(['message' => "Page limit of {$limit} reached."], 422);
+        }
+
         $data = $request->validate([
             'title'            => ['required', 'string', 'max:200'],
             'slug'             => ['nullable', 'string', 'max:200', Rule::notIn(self::RESERVED_SLUGS)],
@@ -60,6 +68,10 @@ class PagesController extends Controller
             'meta_title'       => ['sometimes', 'nullable', 'string', 'max:200'],
             'meta_description' => ['sometimes', 'nullable', 'string', 'max:500'],
         ]);
+
+        if (isset($data['slug'])) {
+            $data['slug'] = $this->uniqueSlug($data['slug'], $page->id);
+        }
 
         $page->update($data);
 
@@ -103,6 +115,11 @@ class PagesController extends Controller
         }
 
         return response()->json(['message' => 'Nav order saved']);
+    }
+
+    private function pageLimit(): ?int
+    {
+        return config('peppermint.max_pages');
     }
 
     private function uniqueSlug(string $raw, ?int $ignoreId = null): string

@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\TestController;
 use App\Http\Controllers\Api\Admin\AdminAuthController;
+use App\Http\Controllers\Api\Admin\AdminPasswordController;
 use App\Http\Controllers\Api\Admin\UsersController;
 use App\Http\Controllers\Api\Admin\ConsumersController;
 use App\Http\Controllers\Api\Admin\BlogsController;
@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\Admin\SectionsController;
 use App\Http\Controllers\Api\Admin\FooterController;
 use App\Http\Controllers\Api\Admin\MediaController;
 use App\Http\Controllers\Api\Consumer\ConsumerAuthController;
+use App\Http\Controllers\Api\Consumer\ConsumerPasswordController;
 use App\Http\Controllers\Api\Public\BlogsController as PublicBlogsController;
 use App\Http\Controllers\Api\Public\ModulesController as PublicModulesController;
 use App\Http\Controllers\Api\Public\PagesController as PublicPagesController;
@@ -28,25 +29,28 @@ use App\Http\Controllers\Api\Admin\CalendarController;
 use App\Http\Controllers\Api\Admin\StatsController;
 use App\Http\Controllers\Api\Consumer\TasksController as ConsumerTasksController;
 use App\Http\Controllers\Api\Public\RoadmapController as PublicRoadmapController;
+use App\Http\Controllers\Api\MaintenanceController;
 use App\Http\Controllers\Api\UserController;
 
-Route::get('/test', [TestController::class, 'test']);
+Route::post('/maintenance/unlock', [MaintenanceController::class, 'unlock'])->middleware('throttle:5,1');
 
 // Admin module
 Route::prefix('admin')->middleware(['module:admin', 'maintenance:admin'])->group(function () {
     Route::post('/auth/login', [AdminAuthController::class, 'login'])->middleware('throttle:10,1');
     Route::post('/auth/logout', [AdminAuthController::class, 'logout'])->middleware('auth:web');
+    Route::post('/auth/forgot-password', [AdminPasswordController::class, 'forgot'])->middleware('throttle:5,1');
+    Route::post('/auth/reset-password', [AdminPasswordController::class, 'reset']);
 
     Route::middleware('auth:web')->group(function () {
         Route::get('/user', [UserController::class, 'getUser']);
         Route::put('/user', [UserController::class, 'updateAdmin']);
 
         Route::middleware('module:consumers')->group(function () {
-            Route::apiResource('consumers', ConsumersController::class);
+            Route::apiResource('consumers', ConsumersController::class)->except(['show']);
         });
 
         Route::middleware('module:team')->group(function () {
-            Route::apiResource('users', UsersController::class);
+            Route::apiResource('users', UsersController::class)->except(['show']);
         });
 
         Route::middleware('module:blogs')->group(function () {
@@ -151,7 +155,7 @@ Route::prefix('public')->group(function () {
         Route::get('/pages/home', [PublicPagesController::class, 'home']);
         Route::get('/pages/{slug}', [PublicPagesController::class, 'show']);
         Route::get('/footer', [PublicFooterController::class, 'index']);
-        Route::post('/contact', [PublicContactController::class, 'store']);
+        Route::post('/contact', [PublicContactController::class, 'store'])->middleware('throttle:10,1');
     });
 });
 
@@ -159,6 +163,8 @@ Route::prefix('public')->group(function () {
 Route::prefix('consumer')->middleware(['module:consumers', 'maintenance'])->group(function () {
     Route::post('/auth/login', [ConsumerAuthController::class, 'login'])->middleware(['module:public_login', 'throttle:10,1']);
     Route::post('/auth/logout', [ConsumerAuthController::class, 'logout'])->middleware('auth:consumer');
+    Route::post('/auth/forgot-password', [ConsumerPasswordController::class, 'forgot'])->middleware('throttle:5,1');
+    Route::post('/auth/reset-password', [ConsumerPasswordController::class, 'reset']);
 
     Route::middleware('auth:consumer')->group(function () {
         Route::get('/user', [UserController::class, 'getConsumer']);

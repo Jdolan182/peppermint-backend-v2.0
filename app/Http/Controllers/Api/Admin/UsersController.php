@@ -34,6 +34,12 @@ class UsersController extends Controller
             unset($validated['password']);
         }
 
+        if (isset($validated['is_active']) && !$validated['is_active'] && $user->id === Auth::id()) {
+            abort(422, 'You cannot deactivate your own account.');
+        }
+
+        unset($validated['is_default']);
+
         $user->update($validated);
 
         return new UserResource($user);
@@ -42,6 +48,7 @@ class UsersController extends Controller
     public function destroy(User $user)
     {
         abort_if($user->id === Auth::id(), 422, 'You cannot delete your own account.');
+        abort_if($user->is_default, 422, 'The default admin cannot be deleted.');
 
         $user->delete();
 

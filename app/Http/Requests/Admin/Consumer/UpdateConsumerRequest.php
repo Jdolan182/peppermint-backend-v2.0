@@ -14,9 +14,10 @@ class UpdateConsumerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'     => ['required', 'string', 'max:255'],
-            'email'    => ['required', 'email', 'unique:consumers,email,' . $this->route('consumer')->id],
-            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'name'      => ['required', 'string', 'max:255'],
+            'email'     => ['required', 'email', 'unique:consumers,email,' . $this->route('consumer')->id],
+            'password'  => ['nullable', 'string', 'min:8', 'confirmed'],
+            'is_active' => ['sometimes', 'boolean'],
         ];
     }
 }

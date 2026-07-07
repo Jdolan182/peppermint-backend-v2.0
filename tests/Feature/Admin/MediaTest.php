@@ -74,6 +74,16 @@ test('store records the correct mime type and size', function () {
         ->and($response->json('size'))->toBeGreaterThan(0);
 });
 
+test('store rejects svg files', function () {
+    Storage::fake('public');
+    $admin = User::factory()->create();
+
+    $this->actingAs($admin, 'web')
+        ->postJson('/api/admin/media', ['file' => UploadedFile::fake()->create('image.svg', 10, 'image/svg+xml')])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['file']);
+});
+
 test('store rejects pdf files', function () {
     Storage::fake('public');
     $admin = User::factory()->create();

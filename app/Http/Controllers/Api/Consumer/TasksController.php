@@ -12,7 +12,7 @@ class TasksController extends Controller
     public function index(Request $request)
     {
         $tasks = Task::with(['type', 'status', 'assignedAdmin', 'roadmapItem'])
-            ->where('consumer_id', Auth::id())
+            ->where('consumer_id', Auth::guard('consumer')->id())
             ->when($request->status_id, fn($q) => $q->where('status_id', $request->status_id))
             ->orderBy('due_date')
             ->orderByDesc('created_at')
@@ -23,7 +23,7 @@ class TasksController extends Controller
 
     public function show(Task $task)
     {
-        abort_unless($task->consumer_id === Auth::id(), 403);
+        abort_unless($task->consumer_id === Auth::guard('consumer')->id(), 403);
 
         return response()->json($task->load(['type', 'status', 'assignedAdmin', 'roadmapItem']));
     }

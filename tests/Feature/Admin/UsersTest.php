@@ -170,3 +170,63 @@ test('unauthenticated request to delete user returns 401', function () {
 
     $this->deleteJson("/api/admin/users/{$user->id}")->assertUnauthorized();
 });
+
+test('update can activate and deactivate a user', function () {
+    $admin = User::factory()->create();
+    $user  = User::factory()->create(['is_active' => true]);
+
+    $this->actingAs($admin, 'web')
+        ->putJson("/api/admin/users/{$user->id}", [
+            'name'      => $user->name,
+            'email'     => $user->email,
+            'is_active' => false,
+        ])
+        ->assertOk()
+        ->assertJsonPath('data.is_active', false);
+});
+
+test('update cannot deactivate own account', function () {
+    $admin = User::factory()->create();
+
+    $this->actingAs($admin, 'web')
+        ->putJson("/api/admin/users/{$admin->id}", [
+            'name'      => $admin->name,
+            'email'     => $admin->email,
+            'is_active' => false,
+        ])
+        ->assertUnprocessable()
+        ->assertJson(['message' => 'You cannot deactivate your own account.']);
+});
+
+test('update can toggle notify_contact', function () {
+    $admin = User::factory()->create();
+    $user  = User::factory()->create(['notify_contact' => false]);
+
+    $this->actingAs($admin, 'web')
+        ->putJson("/api/admin/users/{$user->id}", [
+            'name'           => $user->name,
+            'email'          => $user->email,
+            'notify_contact' => true,
+        ])
+        ->assertOk()
+        ->assertJsonPath('data.notify_contact', true);
+});
+
+test('destroy cannot delete own account', function () {
+    $admin = User::factory()->create();
+
+    $this->actingAs($admin, 'web')
+        ->deleteJson("/api/admin/users/{$admin->id}")
+        ->assertUnprocessable()
+        ->assertJson(['message' => 'You cannot delete your own account.']);
+});
+
+test('destroy cannot delete the default admin', function () {
+    $admin   = User::factory()->create();
+    $default = User::factory()->create(['is_default' => true]);
+
+    $this->actingAs($admin, 'web')
+        ->deleteJson("/api/admin/users/{$default->id}")
+        ->assertUnprocessable()
+        ->assertJson(['message' => 'The default admin cannot be deleted.']);
+});

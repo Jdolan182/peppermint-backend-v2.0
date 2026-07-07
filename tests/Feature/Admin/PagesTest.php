@@ -12,7 +12,7 @@ test('authenticated admin can list pages', function () {
     $this->actingAs($admin, 'web')
         ->getJson('/api/admin/pages')
         ->assertOk()
-        ->assertJsonStructure([['id', 'title', 'slug', 'children']]);
+        ->assertJsonStructure(['pages' => [['id', 'title', 'slug', 'children']], 'page_limit']);
 });
 
 test('index only returns root pages', function () {
@@ -24,8 +24,29 @@ test('index only returns root pages', function () {
         ->getJson('/api/admin/pages')
         ->assertOk();
 
-    expect($response->json())->toHaveCount(1)
-        ->and($response->json('0.id'))->toBe($parent->id);
+    expect($response->json('pages'))->toHaveCount(1)
+        ->and($response->json('pages.0.id'))->toBe($parent->id);
+});
+
+test('index includes page_limit from config', function () {
+    $admin = User::factory()->create();
+
+    $response = $this->actingAs($admin, 'web')
+        ->getJson('/api/admin/pages')
+        ->assertOk();
+
+    expect(array_key_exists('page_limit', $response->json()))->toBeTrue();
+});
+
+test('store returns 422 when page limit is reached', function () {
+    $admin = User::factory()->create();
+    config(['peppermint.max_pages' => 1]);
+    Page::factory()->create();
+
+    $this->actingAs($admin, 'web')
+        ->postJson('/api/admin/pages', ['title' => 'One Too Many'])
+        ->assertUnprocessable()
+        ->assertJson(['message' => 'Page limit of 1 reached.']);
 });
 
 test('unauthenticated request to list pages returns 401', function () {

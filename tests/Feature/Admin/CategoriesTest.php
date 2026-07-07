@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Blog;
 use App\Models\Category;
 use App\Models\User;
 
@@ -105,6 +106,24 @@ test('authenticated admin can delete a category', function () {
         ->assertJson(['message' => 'Category deleted']);
 
     $this->assertDatabaseMissing('categories', ['id' => $category->id]);
+});
+
+test('destroy detaches associated blogs before deleting the category', function () {
+    $admin    = User::factory()->create();
+    $category = Category::factory()->create();
+    $blog     = Blog::factory()->create();
+    $category->blogs()->attach($blog->id);
+
+    $this->assertDatabaseHas('blog_category', ['category_id' => $category->id, 'blog_id' => $blog->id]);
+
+    $this->actingAs($admin, 'web')
+        ->deleteJson("/api/admin/categories/{$category->id}")
+        ->assertOk()
+        ->assertJson(['message' => 'Category deleted']);
+
+    $this->assertDatabaseMissing('categories', ['id' => $category->id]);
+    $this->assertDatabaseHas('blogs', ['id' => $blog->id]);
+    $this->assertDatabaseMissing('blog_category', ['category_id' => $category->id, 'blog_id' => $blog->id]);
 });
 
 test('unauthenticated request to delete category returns 401', function () {

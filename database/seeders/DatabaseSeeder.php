@@ -14,8 +14,10 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         User::factory()->create([
-            'name'  => 'Admin User',
-            'email' => 'admin@example.com',
+            'name'       => 'Admin User',
+            'email'      => 'admin@example.com',
+            'is_default' => true,
+            'notify_contact' => true,
         ]);
 
         Consumer::factory()->create([

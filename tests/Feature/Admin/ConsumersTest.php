@@ -171,3 +171,17 @@ test('unauthenticated request to delete consumer returns 401', function () {
 
     $this->deleteJson("/api/admin/consumers/{$consumer->id}")->assertUnauthorized();
 });
+
+test('update can activate and deactivate a consumer', function () {
+    $admin    = User::factory()->create();
+    $consumer = Consumer::factory()->create(['is_active' => true]);
+
+    $this->actingAs($admin, 'web')
+        ->putJson("/api/admin/consumers/{$consumer->id}", [
+            'name'      => $consumer->name,
+            'email'     => $consumer->email,
+            'is_active' => false,
+        ])
+        ->assertOk()
+        ->assertJsonPath('data.is_active', false);
+});

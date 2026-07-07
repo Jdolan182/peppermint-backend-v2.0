@@ -25,7 +25,6 @@ class SettingsSeeder extends Seeder
             'module_tasks_consumer'  => 'true',
             'module_roadmap'         => 'true',
             'module_roadmap_public'  => 'true',
-            'module_appointments'    => 'true',
         ];
 
         foreach ($settings as $key => $value) {

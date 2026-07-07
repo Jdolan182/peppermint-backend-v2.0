@@ -20,6 +20,7 @@ class SettingsController extends Controller
             'site_name'            => ['sometimes', 'nullable', 'string', 'max:100'],
             'maintenance_enabled'  => ['sometimes', 'boolean'],
             'maintenance_message'  => ['sometimes', 'nullable', 'string', 'max:500'],
+            'consumer_label'       => ['sometimes', 'nullable', 'string', 'max:50'],
             'blog_title'           => ['sometimes', 'nullable', 'string', 'max:200'],
             'blog_description'     => ['sometimes', 'nullable', 'string', 'max:500'],
             'module_blogs'         => ['sometimes', 'boolean'],
@@ -32,7 +33,6 @@ class SettingsController extends Controller
             'module_tasks_consumer'     => ['sometimes', 'boolean'],
             'module_roadmap'            => ['sometimes', 'boolean'],
             'module_roadmap_public'     => ['sometimes', 'boolean'],
-            'module_appointments'       => ['sometimes', 'boolean'],
         ]);
 
         foreach ($data as $key => $value) {

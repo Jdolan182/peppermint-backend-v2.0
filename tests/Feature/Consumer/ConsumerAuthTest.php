@@ -65,3 +65,14 @@ test('admin credentials cannot be used for consumer login', function () {
         ->assertStatus(401)
         ->assertJson(['message' => 'Invalid credentials']);
 });
+
+test('consumer login fails when consumer is inactive', function () {
+    $consumer = Consumer::factory()->create(['is_active' => false]);
+
+    $this->postJson('/api/consumer/auth/login', [
+        'email'    => $consumer->email,
+        'password' => 'password',
+    ])
+        ->assertStatus(401)
+        ->assertJson(['message' => 'Invalid credentials']);
+});

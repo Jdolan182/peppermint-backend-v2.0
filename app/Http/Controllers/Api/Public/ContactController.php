@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\ContactSubmission;
+use App\Models\User;
+use App\Notifications\ContactSubmissionReceived;
 use Illuminate\Http\Request;
 
 class ContactController extends Controller
@@ -17,7 +19,11 @@ class ContactController extends Controller
             'page_slug' => ['nullable', 'string', 'max:255'],
         ]);
 
-        ContactSubmission::create($data);
+        $submission = ContactSubmission::create($data);
+
+        User::where('notify_contact', true)
+            ->where('is_active', true)
+            ->each(fn(User $admin) => $admin->notify(new ContactSubmissionReceived($submission)));
 
         return response()->json(['message' => 'Submission received.'], 201);
     }

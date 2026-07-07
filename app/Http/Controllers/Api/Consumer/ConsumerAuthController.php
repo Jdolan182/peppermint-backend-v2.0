@@ -17,7 +17,7 @@ class ConsumerAuthController extends Controller
             'password' => ['required'],
         ]);
 
-        if (!$this->authService->attempt($credentials, 'consumer')) {
+        if (!$this->authService->attempt(array_merge($credentials, ['is_active' => true]), 'consumer')) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 

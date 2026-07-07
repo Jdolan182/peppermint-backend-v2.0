@@ -41,6 +41,7 @@ class CategoriesController extends Controller
 
     public function destroy(Category $category)
     {
+        $category->blogs()->detach();
         $category->delete();
 
         return response()->json(['message' => 'Category deleted']);

@@ -6,6 +6,8 @@ use App\Models\Task;
 use App\Models\TaskStatus;
 use App\Models\TaskType;
 use App\Models\User;
+use App\Notifications\TaskAssigned;
+use Illuminate\Support\Facades\Notification;
 
 // index
 test('authenticated admin can list tasks', function () {
@@ -289,4 +291,69 @@ test('task update via PATCH works the same as PUT', function () {
         ->patchJson("/api/admin/tasks/{$task->id}", ['title' => 'Patched'])
         ->assertOk()
         ->assertJsonPath('title', 'Patched');
+});
+
+test('store sends TaskAssigned notification when assigned to another admin', function () {
+    Notification::fake();
+    $admin    = User::factory()->create();
+    $assignee = User::factory()->create();
+    $type     = TaskType::factory()->create();
+    TaskStatus::factory()->default()->create();
+
+    $this->actingAs($admin, 'web')
+        ->postJson('/api/admin/tasks', [
+            'title'             => 'Notify task',
+            'type_id'           => $type->id,
+            'assigned_admin_id' => $assignee->id,
+        ])
+        ->assertCreated();
+
+    Notification::assertSentTo($assignee, TaskAssigned::class);
+});
+
+test('store does not send TaskAssigned notification when assigning to self', function () {
+    Notification::fake();
+    $admin = User::factory()->create();
+    $type  = TaskType::factory()->create();
+    TaskStatus::factory()->default()->create();
+
+    $this->actingAs($admin, 'web')
+        ->postJson('/api/admin/tasks', [
+            'title'             => 'Self-assigned task',
+            'type_id'           => $type->id,
+            'assigned_admin_id' => $admin->id,
+        ])
+        ->assertCreated();
+
+    Notification::assertNotSentTo($admin, TaskAssigned::class);
+});
+
+test('update sends TaskAssigned notification when assignee changes', function () {
+    Notification::fake();
+    $admin       = User::factory()->create();
+    $oldAssignee = User::factory()->create();
+    $newAssignee = User::factory()->create();
+    $task        = Task::factory()->create(['assigned_admin_id' => $oldAssignee->id]);
+
+    $this->actingAs($admin, 'web')
+        ->putJson("/api/admin/tasks/{$task->id}", ['assigned_admin_id' => $newAssignee->id])
+        ->assertOk();
+
+    Notification::assertSentTo($newAssignee, TaskAssigned::class);
+});
+
+test('update does not send TaskAssigned notification when assignee is unchanged', function () {
+    Notification::fake();
+    $admin    = User::factory()->create();
+    $assignee = User::factory()->create();
+    $task     = Task::factory()->create(['assigned_admin_id' => $assignee->id]);
+
+    $this->actingAs($admin, 'web')
+        ->putJson("/api/admin/tasks/{$task->id}", [
+            'title'             => 'Updated title',
+            'assigned_admin_id' => $assignee->id,
+        ])
+        ->assertOk();
+
+    Notification::assertNotSentTo($assignee, TaskAssigned::class);
 });

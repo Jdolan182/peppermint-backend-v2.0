@@ -17,7 +17,7 @@ class AdminAuthController extends Controller
             'password' => ['required'],
         ]);
 
-        if (!$this->authService->attempt($credentials, 'web')) {
+        if (!$this->authService->attempt(array_merge($credentials, ['is_active' => true]), 'web')) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 

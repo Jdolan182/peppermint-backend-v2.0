@@ -12,7 +12,7 @@ class CheckMaintenanceMode
     public function handle(Request $request, Closure $next, string $scope = 'public'): Response
     {
         // Env-based: blocks everything including admin (set at deploy time)
-        if (env('MAINTENANCE_MODE', false)) {
+        if (config('peppermint.maintenance_mode', false)) {
             return response()->json([
                 'message' => 'Service temporarily unavailable',
                 'maintenance' => true,

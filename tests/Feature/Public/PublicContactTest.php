@@ -1,6 +1,9 @@
 <?php
 
 use App\Models\ContactSubmission;
+use App\Models\User;
+use App\Notifications\ContactSubmissionReceived;
+use Illuminate\Support\Facades\Notification;
 
 test('visitor can submit a contact form', function () {
     $this->postJson('/api/public/contact', [
@@ -80,4 +83,44 @@ test('submission fails when message is missing', function () {
     ])
         ->assertUnprocessable()
         ->assertJsonValidationErrors(['message']);
+});
+
+test('submission notifies admins with notify_contact enabled', function () {
+    Notification::fake();
+    $notifiable = User::factory()->create(['notify_contact' => true, 'is_active' => true]);
+    User::factory()->create(['notify_contact' => false, 'is_active' => true]);
+
+    $this->postJson('/api/public/contact', [
+        'name'    => 'Test User',
+        'email'   => 'test@example.com',
+        'message' => 'Hello!',
+    ])->assertCreated();
+
+    Notification::assertSentTo($notifiable, ContactSubmissionReceived::class);
+});
+
+test('submission does not notify inactive admins', function () {
+    Notification::fake();
+    $inactive = User::factory()->create(['notify_contact' => true, 'is_active' => false]);
+
+    $this->postJson('/api/public/contact', [
+        'name'    => 'Test User',
+        'email'   => 'test@example.com',
+        'message' => 'Hello!',
+    ])->assertCreated();
+
+    Notification::assertNotSentTo($inactive, ContactSubmissionReceived::class);
+});
+
+test('submission does not notify admins without notify_contact', function () {
+    Notification::fake();
+    $admin = User::factory()->create(['notify_contact' => false, 'is_active' => true]);
+
+    $this->postJson('/api/public/contact', [
+        'name'    => 'Test User',
+        'email'   => 'test@example.com',
+        'message' => 'Hello!',
+    ])->assertCreated();
+
+    Notification::assertNotSentTo($admin, ContactSubmissionReceived::class);
 });

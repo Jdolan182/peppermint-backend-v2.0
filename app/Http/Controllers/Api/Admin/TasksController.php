@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Task;
 use App\Models\TaskStatus;
+use App\Models\User;
+use App\Notifications\TaskAssigned;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -55,6 +57,11 @@ class TasksController extends Controller
 
         $task = Task::create($data);
 
+        if (!empty($data['assigned_admin_id']) && $data['assigned_admin_id'] !== Auth::id()) {
+            $assignee = User::find($data['assigned_admin_id']);
+            $assignee?->notify(new TaskAssigned($task->load('consumer')));
+        }
+
         return response()->json($task->load(['type', 'status', 'assignedAdmin', 'consumer', 'roadmapItem']), 201);
     }
 
@@ -78,7 +85,20 @@ class TasksController extends Controller
             'notes'             => ['sometimes', 'nullable', 'string'],
         ]);
 
+        $previousAssigneeId = $task->assigned_admin_id;
+
         $task->update($data);
+
+        $newAssigneeId = $task->fresh()->assigned_admin_id;
+        if (
+            isset($data['assigned_admin_id']) &&
+            $newAssigneeId &&
+            $newAssigneeId !== $previousAssigneeId &&
+            $newAssigneeId !== Auth::id()
+        ) {
+            $assignee = User::find($newAssigneeId);
+            $assignee?->notify(new TaskAssigned($task->load('consumer')));
+        }
 
         return response()->json($task->fresh()->load(['type', 'status', 'assignedAdmin', 'consumer', 'roadmapItem']));
     }
