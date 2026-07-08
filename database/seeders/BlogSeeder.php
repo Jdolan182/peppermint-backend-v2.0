@@ -106,7 +106,7 @@ class BlogSeeder extends Seeder
             ],
             [
                 'title'   => 'Five signs your current website is losing you business',
-                'excerpt' => 'Slow load times, no mobile layout, a phone number buried in the footer — small problems that add up.',
+                'excerpt' => 'Slow load times, no mobile layout, a phone number buried in the footer. Small problems that add up.',
                 'cats'    => ['Tips & Advice'],
                 'content' => $this->richContent(),
             ],
@@ -130,14 +130,14 @@ class BlogSeeder extends Seeder
 
     private function richContent(): string
     {
-        return '<p>Every project starts with a problem worth solving. The hardest part is not the solution — it\'s staying close enough to the original problem that the solution actually fits.</p>'
+        return '<p>Every project starts with a problem worth solving. The hardest part is not the solution, it\'s staying close enough to the original problem that the solution actually fits.</p>'
             . '<h2>The first principle</h2>'
             . '<p>Good software is software that solves the problem it set out to solve, no more and no less. Scope creep is the enemy of clarity, and clarity is the enemy of mediocrity.</p>'
             . '<p>There are a few things that consistently separate products people love from products people tolerate: speed, honesty, and a refusal to waste the user\'s time.</p>'
             . '<h2>What this means in practice</h2>'
             . '<p>Start by writing down the one thing your feature needs to do. Not three things. One. Then build the smallest version of that. Ship it. Watch what happens.</p>'
             . '<ul><li>Observe how real users interact with it</li><li>Measure the thing that actually matters</li><li>Iterate based on what you see, not what you assumed</li></ul>'
-            . '<p>Most of what ends up in a roadmap was invented in a meeting room by people who hadn\'t talked to a user in weeks. That\'s not a criticism — it\'s just how it goes when you move fast. The antidote is to slow down on the question of <em>what to build</em>, so you can move faster on <em>how to build it</em>.</p>'
+            . '<p>Most of what ends up in a roadmap was invented in a meeting room by people who hadn\'t talked to a user in weeks. That\'s not a criticism, it\'s just how it goes when you move fast. The antidote is to slow down on the question of <em>what to build</em>, so you can move faster on <em>how to build it</em>.</p>'
             . '<blockquote>The goal is not to build more. The goal is to build the right things, well.</blockquote>'
             . '<p>That\'s it, really. Everything else is detail.</p>';
     }

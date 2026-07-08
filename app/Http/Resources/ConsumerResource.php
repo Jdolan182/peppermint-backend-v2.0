@@ -14,6 +14,7 @@ class ConsumerResource extends JsonResource
             'name'       => $this->name,
             'email'      => $this->email,
             'is_active'  => $this->is_active,
+            'is_default' => $this->is_default,
             'created_at' => $this->created_at,
         ];
     }

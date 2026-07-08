@@ -4,6 +4,10 @@ return [
 
     'frontend_url' => rtrim(env('FRONTEND_URL', env('APP_URL', 'http://localhost')), '/'),
 
+    // Absolute path to the built SPA's index.html. When set, page requests
+    // are served through SpaController with meta/OG tags injected.
+    'spa_index_path' => env('SPA_INDEX_PATH'),
+
     'admin_slug' => strtolower(env('ADMIN_SLUG', 'peppermint')),
 
     'maintenance_mode' => (bool) env('MAINTENANCE_MODE', false),

@@ -10,7 +10,7 @@ class SettingsSeeder extends Seeder
     public function run(): void
     {
         $settings = [
-            'site_name'              => 'Peppermint',
+            'site_name'              => 'Fresh Build',
             'maintenance_enabled'    => 'false',
             'maintenance_message'    => "We'll be back shortly.",
             'blog_title'             => 'Blog',

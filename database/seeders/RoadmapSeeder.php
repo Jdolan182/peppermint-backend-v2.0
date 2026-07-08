@@ -27,7 +27,7 @@ class RoadmapSeeder extends Seeder
         // ---- Roadmap items ----------------------------------------------------
 
         $items = [
-            // Design — shipped
+            // Design: shipped
             [
                 'title'            => 'New onboarding flow',
                 'description'      => 'Redesign the first-run experience so new users reach value in under five minutes.',
@@ -38,7 +38,7 @@ class RoadmapSeeder extends Seeder
                 'assigned_admin_id'=> $admin?->id,
                 'sort_order'       => 0,
             ],
-            // Design — in-progress
+            // Design: in-progress
             [
                 'title'            => 'Mobile-responsive admin',
                 'description'      => 'Make the admin panel fully usable on phones and tablets.',
@@ -49,7 +49,7 @@ class RoadmapSeeder extends Seeder
                 'assigned_admin_id'=> $admin?->id,
                 'sort_order'       => 1,
             ],
-            // Design — planned
+            // Design: planned
             [
                 'title'            => 'Theming system',
                 'description'      => 'Allow customers to set a primary colour and font family from settings.',
@@ -61,7 +61,7 @@ class RoadmapSeeder extends Seeder
                 'sort_order'       => 2,
             ],
 
-            // Development — shipped
+            // Development: shipped
             [
                 'title'            => 'Page builder',
                 'description'      => 'Drag-and-drop block editor for building public pages without code.',
@@ -102,7 +102,7 @@ class RoadmapSeeder extends Seeder
                 'assigned_admin_id'=> $admin?->id,
                 'sort_order'       => 6,
             ],
-            // Development — in-progress
+            // Development: in-progress
             [
                 'title'            => 'REST API & webhooks',
                 'description'      => 'Public API with webhook support so customers can integrate with their own tools.',
@@ -113,7 +113,7 @@ class RoadmapSeeder extends Seeder
                 'assigned_admin_id'=> $admin?->id,
                 'sort_order'       => 7,
             ],
-            // Development — planned
+            // Development: planned
             [
                 'title'            => 'Global search',
                 'description'      => 'Cmd-K search across pages, tasks, blog posts, and roadmap items.',
@@ -125,10 +125,10 @@ class RoadmapSeeder extends Seeder
                 'sort_order'       => 8,
             ],
 
-            // Growth — shipped
+            // Growth: shipped
             [
                 'title'            => 'Public roadmap page',
-                'description'      => 'Let visitors see what\'s coming — an embeddable public roadmap with vote support.',
+                'description'      => 'Let visitors see what\'s coming: an embeddable public roadmap with vote support.',
                 'status'           => 'shipped',
                 'start_date'       => '2026-05-20',
                 'date'             => '2026-06-05',
@@ -149,7 +149,7 @@ class RoadmapSeeder extends Seeder
             ],
             [
                 'title'            => 'Consumer portal MVP',
-                'description'      => 'First version of the client-facing portal — login, task list, and basic profile.',
+                'description'      => 'First version of the client-facing portal: login, task list, and basic profile.',
                 'status'           => 'shipped',
                 'start_date'       => '2024-09-01',
                 'date'             => '2024-11-30',
@@ -178,7 +178,7 @@ class RoadmapSeeder extends Seeder
                 'sort_order'       => 14,
             ],
 
-            // Growth — planned
+            // Growth: planned
             [
                 'title'            => 'Referral programme',
                 'description'      => 'Give customers a referral link and reward them when a friend converts.',
@@ -244,7 +244,7 @@ class RoadmapSeeder extends Seeder
             ],
             [
                 'title'             => 'Touch targets too small on kanban cards',
-                'description'       => 'Card action buttons are 24px — iOS requires at least 44px touch targets.',
+                'description'       => 'Card action buttons are 24px, but iOS requires at least 44px touch targets.',
                 'type_id'           => $typeBug?->id,
                 'status_id'         => $statusBacklog?->id,
                 'priority'          => 'low',
@@ -348,7 +348,7 @@ class RoadmapSeeder extends Seeder
             ],
             [
                 'title'             => 'Domain & hosting setup',
-                'description'       => 'Setting up hosting and pointing your domain. No action needed from you — I\'ll update this once it\'s live.',
+                'description'       => 'Setting up hosting and pointing your domain. No action needed from you. I\'ll update this once it\'s live.',
                 'type_id'           => $typeFeature?->id,
                 'status_id'         => $statusDone?->id,
                 'priority'          => 'high',
@@ -374,7 +374,7 @@ class RoadmapSeeder extends Seeder
             ],
             [
                 'title'             => 'Add gallery section to About page',
-                'description'       => 'You mentioned wanting a photo gallery on the About page. I\'ve added a gallery block — send over your photos when ready.',
+                'description'       => 'You mentioned wanting a photo gallery on the About page. I\'ve added a gallery block. Send over your photos when ready.',
                 'type_id'           => $typeImprovement?->id,
                 'status_id'         => $statusBacklog?->id,
                 'priority'          => 'low',
@@ -395,7 +395,7 @@ class RoadmapSeeder extends Seeder
                 'assigned_admin_id' => $admin?->id,
                 'consumer_id'       => null,
                 'roadmap_item_id'   => null,
-                'notes'             => 'Cron was running every 15 min — switched to every minute.',
+                'notes'             => 'Cron was running every 15 min, switched to every minute.',
                 'created_by_admin_id' => $admin?->id,
             ],
             [

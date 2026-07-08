@@ -12,7 +12,7 @@ class Consumer extends Authenticatable
 {
     use HasFactory, Notifiable, SoftDeletes;
 
-    protected $fillable = ['name', 'email', 'password', 'is_active'];
+    protected $fillable = ['name', 'email', 'password', 'is_active', 'is_default'];
 
     protected $hidden = ['password', 'remember_token'];
 
@@ -22,6 +22,7 @@ class Consumer extends Authenticatable
             'email_verified_at' => 'datetime',
             'password'          => 'hashed',
             'is_active'         => 'boolean',
+            'is_default'        => 'boolean',
         ];
     }
 

@@ -40,6 +40,8 @@ class ConsumersController extends Controller
 
     public function destroy(Consumer $consumer)
     {
+        abort_if($consumer->is_default, 422, 'The demo account cannot be deleted.');
+
         $consumer->delete();
 
         return response()->json(['message' => 'Consumer deleted']);

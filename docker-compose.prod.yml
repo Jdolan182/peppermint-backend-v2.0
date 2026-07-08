@@ -10,6 +10,22 @@ services:
     working_dir: /var/www/html
     volumes:
       - .:/var/www/html
+      - ../peppermint-frontend-v2.0/dist:/var/www/spa:ro
+    networks:
+      - laravel
+
+  queue:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: peppermint_queue
+    restart: unless-stopped
+    working_dir: /var/www/html
+    command: php artisan queue:work --tries=3 --max-time=3600
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - mysql
     networks:
       - laravel
 
@@ -21,6 +37,7 @@ services:
       - "80:80"
     volumes:
       - .:/var/www/html
+      - ../peppermint-frontend-v2.0/dist:/var/www/spa:ro
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - app
@@ -31,6 +48,11 @@ services:
     image: mysql:8.0
     container_name: peppermint_mysql
     restart: unless-stopped
+    ports:
+      # Bound to localhost only — reachable from the host machine (or an SSH
+      # tunnel on live), never from the internet. Host port 3307 to avoid
+      # clashing with any locally installed MySQL.
+      - "127.0.0.1:3307:3306"
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: peppermint

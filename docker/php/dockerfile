@@ -31,6 +31,12 @@ RUN apt-get update \
 RUN sed -i 's|;listen = 127.0.0.1:9000|listen = 0.0.0.0:9000|' /usr/local/etc/php-fpm.d/www.conf \
  && sed -i '/listen.allowed_clients/d' /usr/local/etc/php-fpm.d/www.conf
 
+# Upload limits — media uploads are validated at 10MB in the app
+RUN { \
+      echo 'upload_max_filesize = 10M'; \
+      echo 'post_max_size = 12M'; \
+    } > /usr/local/etc/php/conf.d/uploads.ini
+
 # Copy app from builder stage
 COPY --from=builder /app /var/www/html
 

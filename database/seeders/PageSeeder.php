@@ -7,6 +7,13 @@ use App\Models\Page;
 use App\Models\PageSection;
 use Illuminate\Database\Seeder;
 
+/**
+ * Generic starter site for new customer installs.
+ *
+ * A neutral local-service-business template: Home / Services / About /
+ * Contact. Replace the copy per customer in the admin page builder;
+ * the structure is the deliverable here, not the words.
+ */
 class PageSeeder extends Seeder
 {
     public function run(): void
@@ -25,39 +32,53 @@ class PageSeeder extends Seeder
 
     private function seedPages(): void
     {
-        $home     = $this->makePage('Home',     '/',        is_home: true,  show_in_nav: false);
-        $features = $this->makePage('Features', 'features', show_in_nav: true, nav_order: 1);
-        $pricing  = $this->makePage('Pricing',  'pricing',  show_in_nav: true, nav_order: 2);
-        $about    = $this->makePage('About',    'about',    show_in_nav: true, nav_order: 3);
-        $contact  = $this->makePage('Contact',  'contact',  show_in_nav: true, nav_order: 4);
+        $home = $this->makePage('Home', '/', is_home: true, show_in_nav: false,
+            meta_title: 'Your Business Name | Quality service, locally trusted',
+            meta_description: 'Friendly, reliable service from a local business you can count on. Get in touch today for a free, no-obligation quote.',
+        );
 
-        $aboutMe  = $this->makePage('About me', 'about-me', show_in_nav: true, nav_order: 1, parent_id: $about->id);
+        $services = $this->makePage('Services', 'services', show_in_nav: true, nav_order: 1,
+            meta_title: 'Our Services | Your Business Name',
+            meta_description: 'See the full range of services we offer, how we work, and answers to the questions we hear most often.',
+        );
+
+        $about = $this->makePage('About', 'about', show_in_nav: true, nav_order: 2,
+            meta_title: 'About Us | Your Business Name',
+            meta_description: 'Who we are, how we work, and why local customers have trusted us for years.',
+        );
+
+        $contact = $this->makePage('Contact', 'contact', show_in_nav: true, nav_order: 3,
+            meta_title: 'Contact Us | Your Business Name',
+            meta_description: 'Get in touch for a free quote or a friendly chat about what you need. We reply within one working day.',
+        );
 
         $this->seedHomeSections($home);
-        $this->seedFeaturesSections($features);
-        $this->seedPricingSections($pricing);
+        $this->seedServicesSections($services);
         $this->seedAboutSections($about);
-        $this->seedAboutMeSections($aboutMe);
         $this->seedContactSections($contact);
     }
 
     private function makePage(
-        string $title,
-        string $slug,
-        bool   $is_home     = false,
-        bool   $show_in_nav = false,
-        int    $nav_order   = 0,
-        ?int   $parent_id   = null,
+        string  $title,
+        string  $slug,
+        bool    $is_home          = false,
+        bool    $show_in_nav      = false,
+        int     $nav_order        = 0,
+        ?int    $parent_id        = null,
+        ?string $meta_title       = null,
+        ?string $meta_description = null,
     ): Page {
         return Page::create([
-            'title'        => $title,
-            'slug'         => $slug,
-            'is_home'      => $is_home,
-            'is_published' => true,
-            'show_in_nav'  => $show_in_nav,
-            'nav_order'    => $nav_order,
-            'show_footer'  => true,
-            'parent_id'    => $parent_id,
+            'title'            => $title,
+            'slug'             => $slug,
+            'is_home'          => $is_home,
+            'is_published'     => true,
+            'show_in_nav'      => $show_in_nav,
+            'nav_order'        => $nav_order,
+            'show_footer'      => true,
+            'parent_id'        => $parent_id,
+            'meta_title'       => $meta_title,
+            'meta_description' => $meta_description,
         ]);
     }
 
@@ -78,175 +99,108 @@ class PageSeeder extends Seeder
     private function seedHomeSections(Page $page): void
     {
         $this->addSection($page, 'hero', [
-            'heading'             => 'Everything your business needs online — built and managed for you',
-            'subheading'          => 'I build bespoke websites for local businesses that include a blog, customer management, and more. You focus on your business, I handle the tech.',
+            'heading'             => 'Quality service you can rely on',
+            'subheading'          => 'We\'re a local business that takes pride in doing the job properly: on time, on budget, and with a friendly face. See what we can do for you.',
             'body'                => '',
-            'image'               => 'https://picsum.photos/seed/hero1/800/600',
-            'cta_primary_label'   => 'See what\'s included',
-            'cta_primary_url'     => '/features',
-            'cta_secondary_label' => 'Get in touch',
+            'image'               => 'https://picsum.photos/seed/starter-hero/800/600',
+            'cta_primary_label'   => 'Our services',
+            'cta_primary_url'     => '/services',
+            'cta_secondary_label' => 'Get a free quote',
             'cta_secondary_url'   => '/contact',
         ], 1);
 
-        $this->addSection($page, 'stats', [
-            'items' => [
-                ['value' => '2 weeks', 'label' => 'Typical build time',   'description' => 'From brief to live'],
-                ['value' => '1 login', 'label' => 'Manage everything',    'description' => 'Pages, blog, customers — one place'],
-                ['value' => '£0',      'label' => 'Ongoing dev costs',    'description' => 'Monthly fee covers everything'],
-                ['value' => 'Always',  'label' => 'Someone to call',      'description' => 'Not a support ticket queue'],
+        $this->addSection($page, 'features', [
+            'heading'    => 'What we do',
+            'subheading' => 'From small jobs to big projects, we cover it all, and we\'re happy to talk through anything you\'re not sure about.',
+            'items'      => [
+                ['icon' => '🔧', 'title' => 'Your first service',  'description' => 'A short description of your most popular service. What it includes, who it\'s for, and why customers choose you for it.'],
+                ['icon' => '🏠', 'title' => 'Your second service', 'description' => 'Another key service. Keep these descriptions short and benefit-led. What does the customer get out of it?'],
+                ['icon' => '⭐', 'title' => 'Your third service',  'description' => 'A third service or specialty. Three is plenty for the home page. The full list lives on the Services page.'],
             ],
         ], 2);
 
-        $this->addSection($page, 'features', [
-            'heading'    => 'More than just a website',
-            'subheading' => 'Every build comes with a full set of tools to run your online presence — no extra subscriptions needed.',
-            'items'      => [
-                ['icon' => '📝', 'title' => 'Your website',        'description' => 'Beautiful, fast pages built to your spec. Update content yourself whenever you need to.'],
-                ['icon' => '✍️', 'title' => 'Blog',                'description' => 'Write news, updates, or guides. Great for SEO and keeping customers coming back.'],
-                ['icon' => '👥', 'title' => 'Customer portal',     'description' => 'Give customers a login to view quotes, track jobs, or raise requests — all in one place.'],
-                ['icon' => '✅', 'title' => 'Job & task tracking', 'description' => 'Keep on top of what needs doing with a simple task board. Assign to staff or link to customers.'],
-                ['icon' => '🗺️', 'title' => 'Service roadmap',     'description' => 'Show customers what\'s coming — new services, upcoming availability, seasonal changes.'],
-                ['icon' => '📅', 'title' => 'Calendar view',       'description' => 'See tasks and upcoming work together in a shared calendar. Book jobs and plan ahead.'],
+        $this->addSection($page, 'stats', [
+            'items' => [
+                ['value' => '10+',   'label' => 'Years experience',   'description' => 'Serving the local area'],
+                ['value' => '500+',  'label' => 'Happy customers',    'description' => 'And counting'],
+                ['value' => 'Free',  'label' => 'Quotes',             'description' => 'No obligation, no pressure'],
+                ['value' => '5★',    'label' => 'Rated by customers', 'description' => 'On Google and Facebook'],
             ],
         ], 3);
 
         $this->addSection($page, 'testimonials', [
-            'heading'    => 'What your clients will say',
-            'subheading' => 'Your site will feature real reviews from your own customers — here\'s what that looks like.',
+            'heading'    => 'What our customers say',
+            'subheading' => 'Don\'t take our word for it. Here\'s what people in the area think of our work.',
             'items'      => [
                 [
-                    'quote'  => 'I used to have three different tools for my website, my bookings, and keeping track of jobs. Now it\'s all in one place and I actually use it.',
-                    'author' => 'Claire M.',
-                    'role'   => 'Owner, Meridian Beauty Studio',
-                    'image'  => 'https://picsum.photos/seed/avatar1/80/80',
+                    'quote'  => 'Turned up when they said they would, did a brilliant job, and left everything spotless. Couldn\'t ask for more.',
+                    'author' => 'Sarah W.',
+                    'role'   => 'Local customer',
+                    'image'  => 'https://picsum.photos/seed/starter-avatar1/80/80',
                 ],
                 [
-                    'quote'  => 'Was up and running in under two weeks. The admin panel is straightforward enough that even I can update it without breaking anything.',
-                    'author' => 'Tom R.',
-                    'role'   => 'Director, Riverside Heating',
-                    'image'  => 'https://picsum.photos/seed/avatar2/80/80',
+                    'quote'  => 'Really easy to deal with from the first phone call. Fair price, great work, and they explained everything clearly.',
+                    'author' => 'David H.',
+                    'role'   => 'Local customer',
+                    'image'  => 'https://picsum.photos/seed/starter-avatar2/80/80',
                 ],
                 [
-                    'quote'  => 'Having a customer portal was something I\'d wanted for years but thought it would cost a fortune. This was genuinely affordable.',
-                    'author' => 'Jen K.',
-                    'role'   => 'Founder, Keller Landscaping',
-                    'image'  => 'https://picsum.photos/seed/avatar3/80/80',
+                    'quote'  => 'I\'ve recommended them to friends and family. Trustworthy, tidy, and the quality speaks for itself.',
+                    'author' => 'Margaret L.',
+                    'role'   => 'Local customer',
+                    'image'  => 'https://picsum.photos/seed/starter-avatar3/80/80',
                 ],
             ],
         ], 4);
 
         $this->addSection($page, 'cta', [
             'heading'   => 'Ready to get started?',
-            'body'      => '<p>Tell me about your business and what you need. I\'ll come back with a spec and a price — no commitment required.</p>',
-            'cta_label' => 'Get in touch',
+            'body'      => '<p>Get in touch for a free, no-obligation quote. We\'ll get back to you within one working day.</p>',
+            'cta_label' => 'Contact us',
             'cta_url'   => '/contact',
             'style'     => 'dark',
         ], 5);
     }
 
     // -------------------------------------------------------------------------
-    // Features
+    // Services
     // -------------------------------------------------------------------------
 
-    private function seedFeaturesSections(Page $page): void
+    private function seedServicesSections(Page $page): void
     {
         $this->addSection($page, 'page-header', [
-            'heading'    => 'What\'s included',
-            'subheading' => 'Every build comes with the full platform. You only pay for what you actually use.',
+            'heading'    => 'Our services',
+            'subheading' => 'Everything we offer, explained simply. Not sure what you need? Get in touch and we\'ll point you in the right direction.',
         ], 1);
 
         $this->addSection($page, 'features', [
-            'heading'    => 'A complete system, not just a website',
-            'subheading' => 'Most website builders give you a site. This gives you the tools to run your business online.',
+            'heading'    => 'What we offer',
+            'subheading' => 'Replace these with your real services. Aim for one clear sentence about what it is and one about why it matters.',
             'items'      => [
-                ['icon' => '📝', 'title' => 'Page builder',        'description' => 'Build and update your own pages without touching code. Add text, images, and sections whenever you need to.'],
-                ['icon' => '✍️', 'title' => 'Blog',                'description' => 'Publish news, guides, and updates. Organised by category, great for search rankings.'],
-                ['icon' => '👥', 'title' => 'Customer portal',     'description' => 'Customers get their own login to view jobs, raise requests, and track progress. Reduces back-and-forth.'],
-                ['icon' => '✅', 'title' => 'Tasks & job board',   'description' => 'A simple kanban board to manage your workload. Assign jobs to staff, set priorities and due dates.'],
-                ['icon' => '🗺️', 'title' => 'Public roadmap',      'description' => 'Let customers see what\'s coming — new services, seasonal changes, or future availability.'],
-                ['icon' => '📅', 'title' => 'Calendar',            'description' => 'All your tasks and upcoming jobs in one calendar view. See the week at a glance.'],
-                ['icon' => '🌙', 'title' => 'Dark mode',           'description' => 'Looks great in light and dark. Your site automatically matches the visitor\'s system preference.'],
-                ['icon' => '🔧', 'title' => 'Fully managed',       'description' => 'Hosting, updates, backups, and security are all handled. You don\'t need to think about any of it.'],
-            ],
-        ], 2);
-
-        $this->addSection($page, 'bento', [
-            'heading' => 'Built around how you actually work',
-            'items'   => [
-                ['title' => 'Update it yourself',    'description' => 'The admin panel is simple enough to use without any training. Change your pages, post a blog update, or close a job in minutes.',                 'image' => 'https://picsum.photos/seed/feat1/600/400', 'size' => 'wide'],
-                ['title' => 'Everything connected',  'description' => 'Tasks link to customers. Customers link to jobs. It all talks to each other.',                                                                      'image' => 'https://picsum.photos/seed/feat2/400/400', 'size' => 'normal'],
-                ['title' => 'Live in two weeks',     'description' => 'Brief on Monday, live site by the end of week two — typically.',                                                                                   'image' => 'https://picsum.photos/seed/feat3/400/400', 'size' => 'normal'],
-                ['title' => 'Mobile ready',          'description' => 'Your site looks and works perfectly on phones. So does the admin panel.',                                                                           'image' => 'https://picsum.photos/seed/feat4/400/400', 'size' => 'normal'],
-                ['title' => 'No vendor lock-in',     'description' => 'Your content is yours. If you ever leave, you take it with you.',                                                                                   'image' => 'https://picsum.photos/seed/feat5/400/400', 'size' => 'normal'],
-            ],
-        ], 3);
-
-        $this->addSection($page, 'cta', [
-            'heading'   => 'Want to see it in action?',
-            'body'      => '<p>Get in touch and I\'ll show you a live demo tailored to your type of business.</p>',
-            'cta_label' => 'Book a demo',
-            'cta_url'   => '/contact',
-            'style'     => 'dark',
-        ], 4);
-    }
-
-    // -------------------------------------------------------------------------
-    // Pricing
-    // -------------------------------------------------------------------------
-
-    private function seedPricingSections(Page $page): void
-    {
-        $this->addSection($page, 'page-header', [
-            'heading'    => 'Pricing',
-            'subheading' => 'A one-time build fee. Hosting, support, and maintenance are optional — keep it running with me, or take it elsewhere.',
-        ], 1);
-
-        $this->addSection($page, 'pricing', [
-            'heading' => 'Pick the right fit',
-            'plans'   => [
-                [
-                    'name'     => 'Starter',
-                    'price'    => '£599',
-                    'period'   => 'one-time build fee',
-                    'features' => "Up to 5 pages\nBlog\nContact form\nAdmin panel\nSSL certificate\nOptional: hosting & support from £35/mo",
-                    'cta'      => 'Get in touch',
-                    'cta_url'  => '/contact',
-                ],
-                [
-                    'name'     => 'Business',
-                    'price'    => '£999',
-                    'period'   => 'one-time build fee',
-                    'features' => "Unlimited pages\nBlog\nCustomer portal\nTask & job board\nPublic roadmap\nCalendar view\nOptional: hosting & support from £35/mo",
-                    'cta'      => 'Get in touch',
-                    'cta_url'  => '/contact',
-                ],
-                [
-                    'name'     => 'Custom',
-                    'price'    => 'From £1,500',
-                    'period'   => 'one-time build fee',
-                    'features' => "Everything in Business\nBespoke features\nThird-party integrations\nCustom design work\nDedicated support\nOptional: hosting & support from £55/mo",
-                    'cta'      => 'Let\'s talk',
-                    'cta_url'  => '/contact',
-                ],
+                ['icon' => '🔧', 'title' => 'Service one',   'description' => 'What this service is and what\'s included. Mention anything that sets you apart: guarantees, materials, turnaround.'],
+                ['icon' => '🏠', 'title' => 'Service two',   'description' => 'Keep each description to two sentences. Customers scan, they don\'t read.'],
+                ['icon' => '⚡', 'title' => 'Service three', 'description' => 'If a service has its own pricing or process, say so here and expand in the FAQ below.'],
+                ['icon' => '🛠️', 'title' => 'Service four',  'description' => 'It\'s fine to list fewer services and describe them well, rather than listing everything you\'ve ever done.'],
+                ['icon' => '📋', 'title' => 'Service five',  'description' => 'Seasonal or occasional services can go here too. Customers often don\'t know you offer them.'],
+                ['icon' => '⭐', 'title' => 'Service six',   'description' => 'End with your specialty, the thing you want to be known for locally.'],
             ],
         ], 2);
 
         $this->addSection($page, 'faq', [
             'heading' => 'Common questions',
             'items'   => [
-                ['question' => 'Who owns the website?',                       'answer' => 'You do. The content, the domain, all of it. I build and maintain it, but it\'s yours.'],
-                ['question' => 'Can I update the site myself?',               'answer' => 'Yes — the admin panel lets you edit pages, write blog posts, and manage customers without touching code.'],
-                ['question' => 'How long does a build take?',                 'answer' => 'Usually two weeks from brief to launch. More complex builds may take three to four weeks.'],
-                ['question' => 'Is the monthly fee required?',                'answer' => 'No. The build fee is a one-off — the monthly is completely optional. It covers managed hosting, SSL, backups, and ongoing support. If you\'d rather self-host or use your own provider, I\'ll hand everything over.'],
-                ['question' => 'What if I want to cancel or move later?',     'answer' => 'No problem. I\'ll help you migrate everything to wherever you want to go. Nothing is locked in.'],
-                ['question' => 'Do I need to know anything about websites?',  'answer' => 'Nothing at all. That\'s the point. You tell me what you need, I handle the rest.'],
+                ['question' => 'Do you offer free quotes?',            'answer' => 'Yes, every quote is free and there\'s no obligation. Tell us what you need and we\'ll give you a clear price before any work starts.'],
+                ['question' => 'Which areas do you cover?',            'answer' => 'We cover [your town] and the surrounding area. If you\'re not sure whether we reach you, just ask. We\'re flexible for larger jobs.'],
+                ['question' => 'Are you insured?',                     'answer' => 'Fully insured, and happy to show proof of insurance and any relevant certifications on request.'],
+                ['question' => 'How do payments work?',                'answer' => 'For most jobs we take payment on completion. Larger projects may be split into stages. We\'ll agree everything up front so there are no surprises.'],
+                ['question' => 'How quickly can you start?',           'answer' => 'It depends on the season and the size of the job. Get in touch and we\'ll give you an honest lead time straight away.'],
             ],
         ], 3);
 
         $this->addSection($page, 'cta', [
-            'heading'   => 'Not sure which plan fits?',
-            'body'      => '<p>Tell me about your business and I\'ll recommend the right fit. Most people know within a ten-minute chat.</p>',
-            'cta_label' => 'Get in touch',
+            'heading'   => 'Don\'t see what you\'re looking for?',
+            'body'      => '<p>We take on all sorts of work. If it\'s not listed, just ask. The worst we can say is that we know someone better suited.</p>',
+            'cta_label' => 'Ask us anything',
             'cta_url'   => '/contact',
             'style'     => 'light',
         ], 4);
@@ -259,57 +213,40 @@ class PageSeeder extends Seeder
     private function seedAboutSections(Page $page): void
     {
         $this->addSection($page, 'page-header', [
-            'heading'    => 'About',
-            'subheading' => 'A bit about who I am and how I work.',
+            'heading'    => 'About us',
+            'subheading' => 'Who we are and how we work.',
         ], 1);
 
         $this->addSection($page, 'content', [
-            'body' => '<p>I\'m a freelance web developer who builds bespoke websites and management tools for small and local businesses. I started because I kept seeing the same problem: business owners paying for three or four different subscriptions to do things that could all live in one place.</p><p>So I built the platform myself. Every site I deliver is built on top of it — which means you get a full set of tools from day one, without the complexity or cost of stitching together separate products.</p><p>I work with a small number of clients at a time so I can actually give them proper attention. If you get in touch, you\'ll hear back from me directly — not an account manager, not a support bot.</p>',
+            'body' => '<p>Write your story here: how the business started, how long you\'ve been serving the area, and what you care about. Two or three short paragraphs is plenty.</p><p>Customers reading this page are deciding whether to trust you. The things that convince them: how long you\'ve been around, that you\'re local, that real people answer the phone, and that you stand behind your work.</p><p>End with something personal. Businesses are chosen by people, and people buy from people.</p>',
         ], 2);
 
-        $this->addSection($page, 'stats', [
-            'items' => [
-                ['value' => '2024',   'label' => 'Started',          'description' => 'Building tools for real businesses'],
-                ['value' => 'Solo',   'label' => 'How I work',       'description' => 'One developer, full accountability'],
-                ['value' => '2 wks',  'label' => 'Typical turnaround','description' => 'Brief to live site'],
-                ['value' => 'Fixed',  'label' => 'Pricing',          'description' => 'No hourly surprises'],
+        $this->addSection($page, 'team', [
+            'heading'    => 'Meet the team',
+            'subheading' => 'The people who\'ll actually turn up.',
+            'members'    => [
+                [
+                    'name'  => 'Alex Smith',
+                    'role'  => 'Owner',
+                    'bio'   => 'Founded the business and still does the work. Replace this with a couple of sentences about the owner: experience, qualifications, and what they enjoy about the job.',
+                    'image' => 'https://picsum.photos/seed/starter-team1/400/400',
+                ],
+                [
+                    'name'  => 'Jamie Brown',
+                    'role'  => 'Team member',
+                    'bio'   => 'Add each team member customers might meet. A friendly face and a name goes a long way before someone lets you through their front door.',
+                    'image' => 'https://picsum.photos/seed/starter-team2/400/400',
+                ],
             ],
         ], 3);
 
-        $this->addSection($page, 'bento', [
-            'heading' => 'How I work',
-            'items'   => [
-                ['title' => 'I spec it first',       'description' => 'Before any build starts I write up exactly what you\'re getting — pages, features, timeline, price. No surprises.',              'image' => 'https://picsum.photos/seed/bento1/600/400', 'size' => 'wide'],
-                ['title' => 'Small client list',     'description' => 'I keep the number of active clients small so each one gets proper attention.',                                                   'image' => 'https://picsum.photos/seed/bento2/400/400', 'size' => 'normal'],
-                ['title' => 'You talk to me',        'description' => 'No support tickets. No offshore helpdesk. You have my number.',                                                                 'image' => 'https://picsum.photos/seed/bento3/400/400', 'size' => 'normal'],
-                ['title' => 'Built to hand over',    'description' => 'The admin panel is simple enough that you can run it yourself from day one. Training is included.',                             'image' => 'https://picsum.photos/seed/bento4/600/400', 'size' => 'wide'],
-            ],
+        $this->addSection($page, 'cta', [
+            'heading'   => 'Like the sound of us?',
+            'body'      => '<p>Get in touch and see for yourself. A quick chat costs nothing.</p>',
+            'cta_label' => 'Get in touch',
+            'cta_url'   => '/contact',
+            'style'     => 'dark',
         ], 4);
-    }
-
-    // -------------------------------------------------------------------------
-    // About me
-    // -------------------------------------------------------------------------
-
-    private function seedAboutMeSections(Page $page): void
-    {
-        $this->addSection($page, 'page-header', [
-            'heading'    => 'About me',
-            'subheading' => 'The person behind the builds.',
-        ], 1);
-
-        $this->addSection($page, 'team', [
-            'heading'    => '',
-            'subheading' => '',
-            'members'    => [
-                [
-                    'name'  => 'Jordan Dolan',
-                    'role'  => 'Developer & founder',
-                    'bio'   => 'I\'ve been building web applications for years and decided to focus on solving a specific problem: local businesses spending too much on too many tools. I build, I maintain, and I\'m your point of contact for everything.',
-                    'image' => '/images/jordan.jpg',
-                ],
-            ],
-        ], 2);
     }
 
     // -------------------------------------------------------------------------
@@ -320,12 +257,12 @@ class PageSeeder extends Seeder
     {
         $this->addSection($page, 'page-header', [
             'heading'    => 'Get in touch',
-            'subheading' => 'Tell me about your business and what you\'re looking for. I\'ll get back to you within one working day.',
+            'subheading' => 'Tell us what you need and we\'ll get back to you within one working day, usually sooner.',
         ], 1);
 
         $this->addSection($page, 'contact', [
-            'heading'    => 'Send me a message',
-            'subheading' => 'Not sure what you need yet? That\'s fine — just tell me a bit about your business and we\'ll go from there.',
+            'heading'    => 'Send us a message',
+            'subheading' => 'A rough idea of what you\'re after is all we need to get started. Photos help too if it\'s a physical job.',
             'email'      => 'hello@example.com',
         ], 2);
     }
@@ -341,8 +278,8 @@ class PageSeeder extends Seeder
             'order' => 1,
             'data'  => [
                 'logo_image' => null,
-                'tagline'    => 'Bespoke websites and management tools for local businesses.',
-                'copyright'  => '© ' . date('Y') . ' All rights reserved.',
+                'tagline'    => 'Quality service, locally trusted.',
+                'copyright'  => '© ' . date('Y') . ' Your Business Name. All rights reserved.',
             ],
         ]);
 
@@ -350,12 +287,12 @@ class PageSeeder extends Seeder
             'type'  => 'footer-links',
             'order' => 2,
             'data'  => [
-                'heading' => 'Site',
+                'heading' => 'Explore',
                 'links'   => [
-                    ['label' => 'Features', 'url' => '/features'],
-                    ['label' => 'Pricing',  'url' => '/pricing'],
+                    ['label' => 'Services', 'url' => '/services'],
                     ['label' => 'About',    'url' => '/about'],
                     ['label' => 'Blog',     'url' => '/blogs'],
+                    ['label' => 'Contact',  'url' => '/contact'],
                 ],
             ],
         ]);
@@ -364,20 +301,20 @@ class PageSeeder extends Seeder
             'type'  => 'footer-links',
             'order' => 3,
             'data'  => [
-                'heading' => 'Get started',
+                'heading' => 'Get in touch',
                 'links'   => [
-                    ['label' => 'Contact',  'url' => '/contact'],
-                    ['label' => 'Pricing',  'url' => '/pricing'],
-                    ['label' => 'About me', 'url' => '/about-me'],
+                    ['label' => 'Free quotes',   'url' => '/contact'],
+                    ['label' => 'Our services',  'url' => '/services'],
+                    ['label' => 'Customer login', 'url' => '/login'],
                 ],
             ],
         ]);
 
         FooterSection::create([
             'type'  => 'footer-text',
-            'order' => 5,
+            'order' => 4,
             'data'  => [
-                'body' => '<p>Built with care. Your data stays private and is never shared or sold.</p>',
+                'body' => '<p>Fully insured. Free quotes with no obligation. Serving [your town] and the surrounding area.</p>',
             ],
         ]);
     }

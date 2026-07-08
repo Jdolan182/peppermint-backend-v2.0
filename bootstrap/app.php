@@ -12,6 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // TLS terminates at a reverse proxy in front of the containers;
+        // trust its forwarded headers so scheme/host resolve correctly.
+        // The app container is only reachable from the internal network.
+        $middleware->trustProxies(at: '*');
         $middleware->statefulApi();
         $middleware->api(append: [
             \Illuminate\Session\Middleware\StartSession::class,
