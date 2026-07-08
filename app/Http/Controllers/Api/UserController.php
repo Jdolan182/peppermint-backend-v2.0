@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
@@ -32,11 +33,14 @@ class UserController extends Controller
         $user = Auth::guard('web')->user();
 
         $validated = $request->validate([
-            'name'           => 'required|string|max:255',
-            'email'          => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
-            'password'       => 'nullable|string|min:8|confirmed',
-            'notify_contact' => 'sometimes|boolean',
+            'name'             => 'required|string|max:255',
+            'email'            => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
+            'password'         => 'nullable|string|min:8|confirmed',
+            'current_password' => 'nullable|string',
+            'notify_contact'   => 'sometimes|boolean',
         ]);
+
+        $this->requireCurrentPassword($user, $validated);
 
         $user->name  = $validated['name'];
         $user->email = $validated['email'];
@@ -56,10 +60,13 @@ class UserController extends Controller
         $consumer = Auth::guard('consumer')->user();
 
         $validated = $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => ['required', 'email', Rule::unique('consumers', 'email')->ignore($consumer->id)],
-            'password' => 'nullable|string|min:8|confirmed',
+            'name'             => 'required|string|max:255',
+            'email'            => ['required', 'email', Rule::unique('consumers', 'email')->ignore($consumer->id)],
+            'password'         => 'nullable|string|min:8|confirmed',
+            'current_password' => 'nullable|string',
         ]);
+
+        $this->requireCurrentPassword($consumer, $validated);
 
         $consumer->name  = $validated['name'];
         $consumer->email = $validated['email'];
@@ -69,5 +76,25 @@ class UserController extends Controller
         $consumer->save();
 
         return response()->json(['data' => $consumer]);
+    }
+
+    /**
+     * Changing email or password requires re-authenticating with the current
+     * password, so a hijacked session can't take over the account.
+     */
+    protected function requireCurrentPassword($user, array $validated): void
+    {
+        $changingEmail    = $validated['email'] !== $user->email;
+        $changingPassword = !empty($validated['password']);
+
+        if (!$changingEmail && !$changingPassword) {
+            return;
+        }
+
+        if (!Hash::check($validated['current_password'] ?? '', $user->password)) {
+            throw ValidationException::withMessages([
+                'current_password' => ['Your current password is incorrect.'],
+            ]);
+        }
     }
 }

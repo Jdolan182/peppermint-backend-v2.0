@@ -39,7 +39,11 @@ test('authenticated admin can update their name and email', function () {
     $user = User::factory()->create(['name' => 'Old Name', 'email' => 'old@example.com']);
 
     $this->actingAs($user, 'web')
-        ->putJson('/api/admin/user', ['name' => 'New Name', 'email' => 'new@example.com'])
+        ->putJson('/api/admin/user', [
+            'name'             => 'New Name',
+            'email'            => 'new@example.com',
+            'current_password' => 'password',
+        ])
         ->assertOk()
         ->assertJsonPath('data.name', 'New Name')
         ->assertJsonPath('data.email', 'new@example.com');
@@ -82,6 +86,7 @@ test('authenticated admin can change their password', function () {
             'email'                 => $user->email,
             'password'              => 'newpassword',
             'password_confirmation' => 'newpassword',
+            'current_password'      => 'password',
         ])
         ->assertOk();
 
@@ -102,6 +107,79 @@ test('updateAdmin fails with password shorter than 8 characters', function () {
         ->assertJsonValidationErrors(['password']);
 });
 
+test('updateAdmin does not require current_password for name-only update', function () {
+    $user = User::factory()->create(['email' => 'same@example.com']);
+
+    $this->actingAs($user, 'web')
+        ->putJson('/api/admin/user', ['name' => 'New Name', 'email' => 'same@example.com'])
+        ->assertOk()
+        ->assertJsonPath('data.name', 'New Name');
+});
+
+test('updateAdmin does not require current_password for notify_contact toggle', function () {
+    $user = User::factory()->create(['notify_contact' => false]);
+
+    $this->actingAs($user, 'web')
+        ->putJson('/api/admin/user', [
+            'name'           => $user->name,
+            'email'          => $user->email,
+            'notify_contact' => true,
+        ])
+        ->assertOk()
+        ->assertJsonPath('data.notify_contact', true);
+});
+
+test('updateAdmin requires current_password when changing email', function () {
+    $user = User::factory()->create(['email' => 'old@example.com']);
+
+    $this->actingAs($user, 'web')
+        ->putJson('/api/admin/user', ['name' => $user->name, 'email' => 'new@example.com'])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['current_password']);
+});
+
+test('updateAdmin fails with wrong current_password when changing email', function () {
+    $user = User::factory()->create(['email' => 'old@example.com']);
+
+    $this->actingAs($user, 'web')
+        ->putJson('/api/admin/user', [
+            'name'             => $user->name,
+            'email'            => 'new@example.com',
+            'current_password' => 'wrong-password',
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['current_password']);
+});
+
+test('updateAdmin requires current_password when setting a new password', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user, 'web')
+        ->putJson('/api/admin/user', [
+            'name'                  => $user->name,
+            'email'                 => $user->email,
+            'password'              => 'newpassword',
+            'password_confirmation' => 'newpassword',
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['current_password']);
+});
+
+test('updateAdmin fails with wrong current_password when setting a new password', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user, 'web')
+        ->putJson('/api/admin/user', [
+            'name'                  => $user->name,
+            'email'                 => $user->email,
+            'password'              => 'newpassword',
+            'password_confirmation' => 'newpassword',
+            'current_password'      => 'wrong-password',
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['current_password']);
+});
+
 test('unauthenticated request to update admin user returns 401', function () {
     $this->putJson('/api/admin/user', ['name' => 'X', 'email' => 'x@x.com'])->assertUnauthorized();
 });
@@ -111,7 +189,11 @@ test('authenticated consumer can update their name and email', function () {
     $consumer = Consumer::factory()->create(['name' => 'Old Name', 'email' => 'old2@example.com']);
 
     $this->actingAs($consumer, 'consumer')
-        ->putJson('/api/consumer/user', ['name' => 'New Name', 'email' => 'new2@example.com'])
+        ->putJson('/api/consumer/user', [
+            'name'             => 'New Name',
+            'email'            => 'new2@example.com',
+            'current_password' => 'password',
+        ])
         ->assertOk()
         ->assertJsonPath('data.name', 'New Name')
         ->assertJsonPath('data.email', 'new2@example.com');
@@ -154,6 +236,7 @@ test('authenticated consumer can change their password', function () {
             'email'                 => $consumer->email,
             'password'              => 'newpassword',
             'password_confirmation' => 'newpassword',
+            'current_password'      => 'password',
         ])
         ->assertOk();
 
@@ -172,6 +255,51 @@ test('updateConsumer fails with password shorter than 8 characters', function ()
         ])
         ->assertUnprocessable()
         ->assertJsonValidationErrors(['password']);
+});
+
+test('updateConsumer does not require current_password for name-only update', function () {
+    $consumer = Consumer::factory()->create(['email' => 'same2@example.com']);
+
+    $this->actingAs($consumer, 'consumer')
+        ->putJson('/api/consumer/user', ['name' => 'New Name', 'email' => 'same2@example.com'])
+        ->assertOk()
+        ->assertJsonPath('data.name', 'New Name');
+});
+
+test('updateConsumer requires current_password when changing email', function () {
+    $consumer = Consumer::factory()->create(['email' => 'oldc@example.com']);
+
+    $this->actingAs($consumer, 'consumer')
+        ->putJson('/api/consumer/user', ['name' => $consumer->name, 'email' => 'newc@example.com'])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['current_password']);
+});
+
+test('updateConsumer fails with wrong current_password when changing email', function () {
+    $consumer = Consumer::factory()->create(['email' => 'oldc@example.com']);
+
+    $this->actingAs($consumer, 'consumer')
+        ->putJson('/api/consumer/user', [
+            'name'             => $consumer->name,
+            'email'            => 'newc@example.com',
+            'current_password' => 'wrong-password',
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['current_password']);
+});
+
+test('updateConsumer requires current_password when setting a new password', function () {
+    $consumer = Consumer::factory()->create();
+
+    $this->actingAs($consumer, 'consumer')
+        ->putJson('/api/consumer/user', [
+            'name'                  => $consumer->name,
+            'email'                 => $consumer->email,
+            'password'              => 'newpassword',
+            'password_confirmation' => 'newpassword',
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['current_password']);
 });
 
 test('unauthenticated request to update consumer user returns 401', function () {

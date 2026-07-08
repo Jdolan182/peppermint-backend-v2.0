@@ -39,7 +39,7 @@ Route::prefix('admin')->middleware(['module:admin', 'maintenance:admin'])->group
     Route::post('/auth/login', [AdminAuthController::class, 'login'])->middleware('throttle:10,1');
     Route::post('/auth/logout', [AdminAuthController::class, 'logout'])->middleware('auth:web');
     Route::post('/auth/forgot-password', [AdminPasswordController::class, 'forgot'])->middleware('throttle:5,1');
-    Route::post('/auth/reset-password', [AdminPasswordController::class, 'reset']);
+    Route::post('/auth/reset-password', [AdminPasswordController::class, 'reset'])->middleware('throttle:5,1');
 
     Route::middleware('auth:web')->group(function () {
         Route::get('/user', [UserController::class, 'getUser']);
@@ -164,7 +164,7 @@ Route::prefix('consumer')->middleware(['module:consumers', 'maintenance'])->grou
     Route::post('/auth/login', [ConsumerAuthController::class, 'login'])->middleware(['module:public_login', 'throttle:10,1']);
     Route::post('/auth/logout', [ConsumerAuthController::class, 'logout'])->middleware('auth:consumer');
     Route::post('/auth/forgot-password', [ConsumerPasswordController::class, 'forgot'])->middleware('throttle:5,1');
-    Route::post('/auth/reset-password', [ConsumerPasswordController::class, 'reset']);
+    Route::post('/auth/reset-password', [ConsumerPasswordController::class, 'reset'])->middleware('throttle:5,1');
 
     Route::middleware('auth:consumer')->group(function () {
         Route::get('/user', [UserController::class, 'getConsumer']);

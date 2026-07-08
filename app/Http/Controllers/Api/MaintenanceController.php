@@ -13,7 +13,7 @@ class MaintenanceController extends Controller
 
         $expected = config('peppermint.maintenance_bypass_password');
 
-        if (!$expected || $request->password !== $expected) {
+        if (!$expected || !hash_equals($expected, $request->password)) {
             return response()->json(['message' => 'Incorrect password.'], 403);
         }
 
