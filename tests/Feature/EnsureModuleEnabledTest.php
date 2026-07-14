@@ -1,21 +1,19 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-
 test('middleware passes request through when module is enabled', function () {
-    // MODULE_ADMIN_ENABLED=true is set in phpunit.xml
-    Route::get('/test-module-enabled', fn () => response()->json(['ok' => true]))
-        ->middleware('module:admin');
-
-    $this->getJson('/test-module-enabled')->assertOk();
+    // MODULE_ADMIN_ENABLED=true in phpunit.xml — admin login route uses module:admin
+    $this->postJson('/api/admin/auth/login', ['email' => 'test@example.com', 'password' => 'password'])
+        ->assertStatus(401); // module enabled, passes through, fails on bad credentials
 });
 
 test('middleware returns 404 when module env var is not set', function () {
-    // 'nonexistent' maps to MODULE_NONEXISTENT_ENABLED which has no env entry → defaults to false
-    Route::get('/test-module-disabled', fn () => response()->json(['ok' => true]))
-        ->middleware('module:nonexistent');
+    config(['peppermint.modules.blogs' => false]);
 
-    $this->getJson('/test-module-disabled')
-        ->assertStatus(404)
-        ->assertJson(['message' => 'Module not available']);
+    try {
+        $this->getJson('/api/public/blogs')
+            ->assertStatus(404)
+            ->assertJson(['message' => 'Module not available']);
+    } finally {
+        config(['peppermint.modules.blogs' => true]);
+    }
 });
