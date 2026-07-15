@@ -14,7 +14,11 @@ class UsersController extends Controller
 {
     public function index(Request $request)
     {
-        $users = User::latest()->paginate($request->integer('per_page', 15));
+        // The default admin (the developer's support account) is only visible
+        // to itself — customer admins don't see it in the team list.
+        $users = User::latest()
+            ->when(!$request->user()->is_default, fn ($q) => $q->where('is_default', false))
+            ->paginate($request->integer('per_page', 15));
 
         return UserResource::collection($users);
     }
@@ -28,6 +32,10 @@ class UsersController extends Controller
 
     public function update(UpdateUserRequest $request, User $user)
     {
+        // Only the default admin may modify its own account — other admins
+        // can't change its email/password (or lock the support account out).
+        abort_if($user->is_default && $user->id !== Auth::id(), 403, 'This account cannot be modified.');
+
         $validated = $request->validated();
 
         if (empty($validated['password'])) {

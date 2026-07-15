@@ -27,6 +27,11 @@ RUN apt-get update \
     && docker-php-ext-enable pdo_mysql \
     && rm -rf /var/lib/apt/lists/*
 
+# Composer binary — needed because compose bind-mounts the project over
+# /var/www/html, hiding the builder stage's vendor/; deps are installed
+# into the mount via `compose run app composer install`
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
 # Enable php-fpm TCP listen
 RUN sed -i 's|;listen = 127.0.0.1:9000|listen = 0.0.0.0:9000|' /usr/local/etc/php-fpm.d/www.conf \
  && sed -i '/listen.allowed_clients/d' /usr/local/etc/php-fpm.d/www.conf
